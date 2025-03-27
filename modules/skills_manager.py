@@ -12,9 +12,12 @@ class SkillManager:
 
     def __init__(self, robot: Robot):
         self.robot = robot
-        self.skills = []
+        self.skills = {}
 
-    def skill_id_builder(id: int):
+    # 生成技能id
+    # @param id 技能序数，如技能1技能2
+    # @return 技能id
+    def skill_id_builder(id: int) -> str:
         return "skill-" + id
 
     # 加载技能
