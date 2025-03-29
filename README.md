@@ -1,6 +1,8 @@
 # dgzx-robomaster-raspi
-An open-source robomaster controlling library from DGZX by Team EOR.
+一个开源的RoboMaster主控仓库。  
+An **_open-source_** robomaster controlling library.
 
+**by Team EOR from DGZX.**
 ## 一、环境配置
 
 ### （一）系统选择
@@ -77,7 +79,7 @@ $ sudo apt-get install libjpeg8-dev -y
 $ sudo apt-get install libtiff5-dev -y
 $ sudo apt-get install libjasper-dev -y
 ```
-如果在这里的最后一行指令出现报错，那么请移步**项目文件夹**创建虚拟环境再执行下方指令。
+如果在上一步最后一行的指令出现报错，那么请移步**项目文件夹**创建虚拟环境再执行下方指令。
 ```sh
 $ cd my-project # or dgzx-robomaster-raspi
 # 更新pip

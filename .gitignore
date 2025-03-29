@@ -1,3 +1,6 @@
+# 排除日志
+/assets/log/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
