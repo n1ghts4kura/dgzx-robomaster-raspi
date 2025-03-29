@@ -24,10 +24,11 @@ An **_open-source_** robomaster controlling library
 - *__robot__* 文件夹 存放和机器人相关模块
 - * *__robot.py__* 模块 机器人连接模块
 - * *__robot_state.py__* 模块 机器人状态重置模块  
+
 <br>
+
 - *__skill__* 文件夹 存放技能相关模块
 - * *__skill_manager.py__* 模块 技能管理类
-<br>
 
 <br>
 
