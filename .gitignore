@@ -1,5 +1,7 @@
 # 排除日志
 /assets/log/
+/README_old.md
+/test_usage.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

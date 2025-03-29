@@ -1,16 +1,18 @@
-from typing import List, Dict
-from threading import Thread
+from typing import List
+from threading import Thread, Lock
 from robomaster.robot import Robot
 import os
 import glob
 
-from .logger import logger as LOGGER
+from ..utils.logger import logger as LOGGER
+from ..robot.robot_state import RobotStateRestorer
 
 SKILL_FUNCTION = function[..., None]
 
+# 线程锁
+# lock = Lock()
+
 # 技能管理类
-# 本类功能未完成 请自行辩证看待代码 - n1ghts4kura
-# 原因：依赖robot_state.py中RobotStateRestorer未完成
 class SkillManager:
 
     def __init__(self, robot: Robot):
@@ -27,10 +29,13 @@ class SkillManager:
         # 目前正在运行的技能
         self.current_skill: int = -1
 
+        # 机器人状态重置器
+        self.robot_resetter: RobotStateRestorer = RobotStateRestorer(robot)
+
     # 加载技能
     def load_skills(self) -> bool:
 
-        LOGGER.info("开始加载技能。")
+        LOGGER.info("开始加载技能...")
 
         current_directory = os.getcwd()
         skill_sort = []
@@ -58,10 +63,12 @@ class SkillManager:
                         start_function: SKILL_FUNCTION = __import__("./skills/" + skill_file_name).start
                         # 将技能序数与技能对应
                         self.skills[index] = start_function
+
+                        LOGGER.info(f"技能-{skill_file_name} 加载成功！")
                     except Exception as e:
                         LOGGER.exception(str(e))
                         LOGGER.error("技能加载失败，请检查代码。")
-                        LOGGER.error(f"问题出现：技能文件名称-{skill_file_name}")
+                        LOGGER.error(f"问题出现于 技能文件-{skill_file_name}")
                         return False
 
         # 检查是否有技能空槽
@@ -109,19 +116,25 @@ class SkillManager:
 
         # 启动
         thread.start()
+        self.current_skill = index
         LOGGER.info(f"技能{index}启动成功。")
         return True
 
     # TODO 未完成
     # 停止目前正在执行的技能，并对机器人对象进行状态还原
-    # @return 不知道返回什么。
+    # @return 结束技能的结果
     def stop_skill(self) -> bool:
 
-        LOGGER.info("正在结束正在运行的技能。")
+        LOGGER.info("正在结束正在运行的技能...")
 
-        # 没有技能正在运行
+        # 如果没有技能正在运行
         if self.current_skill == -1:
-            LOGGER.warning("目前没有技能正在运行。")
+            LOGGER.warning("目前没有技能正在运行！")
             return False
 
+        # 否则重置机器人
+        self.robot_resetter.restore()
+        self.current_skill = -1
+
+        LOGGER.info("重置完成。")
         return True

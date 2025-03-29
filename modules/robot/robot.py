@@ -1,5 +1,7 @@
 from robomaster import robot
 
+from ..utils.logger import logger as LOGGER
+
 # 机器人连接管理类
 class Robot:
     instance: robot.Robot
@@ -8,7 +10,7 @@ class Robot:
         self.instance = robot.Robot()
         self.instance.initialize(conn_type="rndis")
 
-        print("机器人版本: " + self.instance.get_version)
+        LOGGER.info("机器人版本: " + self.instance.get_version)
 
     def __del__(self):
         self.instance.close()
