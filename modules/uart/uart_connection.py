@@ -53,7 +53,7 @@ class UartConnection:
         # 连接状态锁
         self.conn_status_lock: threading.Lock = threading.Lock()
 
-        connection_thread = threading.Thread(target = self.loop, args = (self, ))
+        connection_thread = threading.Thread(target = self.loop, args = tuple())
         connection_thread.start()
 
     # 更改连接状态
@@ -80,7 +80,7 @@ class UartConnection:
         
     # 发送串口数据
     # 调用函数请保证conn连接成功
-    def sendline(self, text: str | int) -> bool:
+    def sendline(self, text) -> bool:
         try:
             self.conn.write(str(text))
             return True
