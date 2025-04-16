@@ -18,7 +18,7 @@ from ..utils.logger import logger as LOGGER
 class RobotStateRestorer:
 
     def __init__(self, robot: Robot):
-        self.robot = robot
+        self.robot = robot.instance
     
     # 重置
     def restore(self):
@@ -26,12 +26,14 @@ class RobotStateRestorer:
         LOGGER.info("正在重置机器人状态...")
 
         # 1.底盘
-        self.robot.chassis.drive_speed(0, 0)
-        self.robot.chassis.stick_overlay(0)
+        chassis = self.robot.chassis
+        chassis.drive_speed(0, 0)
+        #chassis.stick_overlay(0)
 
         # 2.云台
-        self.robot.gimbal.resume()
-        self.robot.gimbal.recenter(180, 180).wait_for_completed()
-        self.robot.gimbal.drive_speed(0, 0)
+        gimbal = self.robot.gimbal
+        gimbal.resume()
+        gimbal.recenter(180, 180).wait_for_completed()
+        gimbal.drive_speed(0, 0)
 
         LOGGER.info("重置完成")

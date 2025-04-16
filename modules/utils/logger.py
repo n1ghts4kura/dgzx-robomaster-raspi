@@ -26,3 +26,7 @@ file_output_handler.setLevel(logging.DEBUG)
 
 logger.addHandler(cmd_output_handler)
 logger.addHandler(file_output_handler)
+
+LOGGER_PREFIX = {
+    "UART_CONNECTION": "[class UartConnection] ",
+}

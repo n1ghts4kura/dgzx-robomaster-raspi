@@ -2,6 +2,7 @@
 /assets/log/
 /README_old.md
 /test_usage.py
+/.sync
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

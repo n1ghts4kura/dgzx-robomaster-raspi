@@ -3,11 +3,16 @@ from threading import Thread, Lock
 from robomaster.robot import Robot
 import os
 import glob
+import importlib
 
 from ..utils.logger import logger as LOGGER
 from ..robot.robot_state import RobotStateRestorer
 
-SKILL_FUNCTION = function[..., None]
+def _get_lib(lib_name: str):
+    try:
+        return importlib.import_module(".{}".format(lib_name), package="skills")
+    except Exception as e:
+        return None
 
 # 线程锁
 # lock = Lock()
@@ -17,13 +22,13 @@ class SkillManager:
 
     def __init__(self, robot: Robot):
 
-        self.robot: Robot = robot
+        self.robot: Robot = robot.instance
 
         # 技能列表类型：
         # [
         #   start1, start2, start3, ...
         # ]
-        self.skills: List[SKILL_FUNCTION] = [None for i in range(7)]
+        self.skills: List = [None for i in range(7)]
         self.threads: List[Thread] = [None for i in range(7)]
 
         # 目前正在运行的技能
@@ -48,23 +53,32 @@ class SkillManager:
         # 获取当前skills目录内所有技能文件
         skill_file_names = glob.glob(current_directory + "/skills/*")
 
+        LOGGER.info(skill_sort)
+        LOGGER.info(skill_file_names)
+
         for skill_file_name in skill_file_names:
+            LOGGER.info(f"Doing skill-{skill_file_name}")
             # 获取文件名（无后缀）
+            skill_file_name = skill_file_name.split("skills/")[1]
             skill_file_name = skill_file_name.split(".py")[0]
 
             # 跳过没有装载的技能
             if not skill_file_name in skill_sort:
                 continue
             
-            for index in range(7):
+            for index in range(len(skill_sort)):
                 if skill_file_name == skill_sort[index]:
                     try:
-                        # 利用__import__函数动态导入技能启动函数
-                        start_function: SKILL_FUNCTION = __import__("./skills/" + skill_file_name).start
-                        # 将技能序数与技能对应
-                        self.skills[index] = start_function
+                        # 利用__import__函数动态导入技能
+                        skill_lib = _get_lib(skill_file_name)
 
-                        LOGGER.info(f"技能-{skill_file_name} 加载成功！")
+                        if skill_lib != None:
+                            # 将技能序数与技能对应
+                            self.skills[index] = skill_lib.start
+                            LOGGER.info(f"技能-{skill_file_name} 加载成功！")
+                        else:
+                            LOGGER.info(f"Load skill-{skill_file_name} failed.")
+
                     except Exception as e:
                         LOGGER.exception(str(e))
                         LOGGER.error("技能加载失败，请检查代码。")
@@ -82,7 +96,7 @@ class SkillManager:
             # 跳过空技能
             if skill is None:
                 continue
-            self.threads[index] = Thread(target = skill, args=(self.robot))
+            self.threads[index] = Thread(target = skill, args=(self.robot, ))
 
         # 加载成功
         LOGGER.info("全部技能加载成功。")
@@ -138,3 +152,20 @@ class SkillManager:
 
         LOGGER.info("重置完成。")
         return True
+
+    def log_skills(self):
+        _prefix = "[class-Robot-<log_skills> {}"
+        LOGGER.info(_prefix.format("Current loaded skills:"))
+
+        index = 0
+        for skill in self.skills:
+            LOGGER.info(_prefix.format("[{}] {}".format(index, skill)))
+            index += 1
+
+        index = 0
+        for skill in self.threads:
+            LOGGER.info(_prefix.format("[{}] {}".format(index, skill)))
+            index += 1
+
+
+        
