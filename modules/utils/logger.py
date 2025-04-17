@@ -30,3 +30,8 @@ logger.addHandler(file_output_handler)
 LOGGER_PREFIX = {
     "UART_CONNECTION": "[class UartConnection] ",
 }
+
+def PREFIX_GENERATOR(prefix: str):
+    def wrapper(content: str):
+        return prefix + content
+    return wrapper

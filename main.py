@@ -3,6 +3,7 @@
 from modules.utils.logger import logger as LOGGER
 from modules.robot.robot import Robot
 from modules.skill.skill_manager import SkillManager
+from modules.uart.uart_connection import UartConnection
 
 
 def main() -> bool:
@@ -17,6 +18,18 @@ def main() -> bool:
         LOGGER.error("技能加载失败")
         return False
     skill_manager.log_skills()
+
+    def handler(command: str, data: str):
+        if command == "KEYBOARD":
+            skill_manager.load_skills(data)
+
+    uart_connection = UartConnection(handler)
+    if not uart_connection.initialize():
+        LOGGER.error("明文sdk连接失败")
+    uart_connection.start()
+
+    while True:
+        pass
 
 
 if __name__ == "__main__":
