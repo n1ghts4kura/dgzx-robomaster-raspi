@@ -1,45 +1,29 @@
 import time
-import serial
+import socket
 import threading
 
 from ..utils.logger import logger as LOGGER
 from ..utils.logger import LOGGER_PREFIX as _p
 from ..utils.logger import PREFIX_GENERATOR
-_gen = PREFIX_GENERATOR(LOGGER_PREFIX = _p["UART_CONNECTION"])
+_gen = PREFIX_GENERATOR(LOGGER_PREFIX = _p["RNDIS_CONNECTION"])
 
 CONN_STATUS_ING     = 0x00
 CONN_STATUS_SUCCESS = 0x01
 
 # 明文SDK通信连接类
-class UartConnection:
+class RndisConnection:
     
     def __init__(
         self,
         # 指令处理函数
         handler,
-        port     = "/dev/ttyAMA0",
-        baudrate = 115200,
-        bytesize = serial.EIGHTBITS,
-        stopbits = serial.STOPBITS_ONE,
-        parity   = serial.PARITY_NONE,
+        host: str = "192.168.42.2",
+        port: int = 40923,
         timeout  = 5 # 单位: seconds
     ):
         self.set_status(CONN_STATUS_ING)
 
-        self.conn_status = CONN_STATUS_ING
-        self.conn_status_lock = threading.Lock()
-
-        self.handler = handler
-        
-        # 配置串口
-        _serial          = _serial.Serial()
-        _serial.port     = port 
-        _serial.baudrate = baudrate
-        _serial.bytesize = bytesize
-        _serial.stopbits = stopbits
-        _serial.parity   = parity
-        _serial.timeout  = timeout
-        self.serial: serial.Serial = _serial
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self):
         self.loop_thread = threading.Thread(target=self.loop, args=tuple())
@@ -49,7 +33,7 @@ class UartConnection:
         try:
             self.serial.write((content + "\n").encode("utf-8"))
         except:
-            LOGGER.error(_gen("向串口写入数据失败"))
+            LOGGER.error(_gen("Failed to write data."))
             return False
         return True
 
@@ -58,10 +42,10 @@ class UartConnection:
             response = self.serial.readline().decode("utf-8")
             response = response.strip()
         except:
-            LOGGER.error(_gen("获取串口数据失败"))
+            LOGGER.error(_gen("Failed to get data."))
             return False
 
-        LOGGER.info(f"串口接收信息：{response}")
+        LOGGER.info(_gen(f"Received data: <{response}>"))
         return True
 
     # 初始化
@@ -70,7 +54,7 @@ class UartConnection:
         count = 0
 
         self.serial.open()
-        LOGGER.info(_gen("明文sdk开始连接"))
+        LOGGER.info(_gen("Start connection"))
         while not self.serial.is_open:
             if count >= 10:
                 LOGGER.error(_gen("明文sdk连接失败：串口无法连接。请重启程序"))
