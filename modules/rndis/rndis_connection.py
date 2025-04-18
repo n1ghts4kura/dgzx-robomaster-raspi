@@ -21,9 +21,12 @@ class RndisConnection:
         port: int = 40923,
         timeout  = 5 # 单位: seconds
     ):
-        self.set_status(CONN_STATUS_ING)
+        self.conn_status = CONN_STATUS_ING
+        self.conn_status_lock = threading.Lock()
 
+        self.address = (host, port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(timeout)
 
     def start(self):
         self.loop_thread = threading.Thread(target=self.loop, args=tuple())
@@ -31,7 +34,7 @@ class RndisConnection:
 
     def writeline(self, content: str) -> bool:
         try:
-            self.serial.write((content + "\n").encode("utf-8"))
+            self.socket.send(content.encode("utf-8"))
         except:
             LOGGER.error(_gen("Failed to write data."))
             return False
@@ -39,7 +42,7 @@ class RndisConnection:
 
     def readline(self) -> str:
         try:
-            response = self.serial.readline().decode("utf-8")
+            response = self.socket.recv(1024).decode("utf-8")
             response = response.strip()
         except:
             LOGGER.error(_gen("Failed to get data."))
@@ -49,41 +52,31 @@ class RndisConnection:
         return True
 
     # 初始化
-    def initialize(self):
+    def initialize(self) -> bool:
         # 连接
-        count = 0
-
-        self.serial.open()
-        LOGGER.info(_gen("Start connection"))
-        while not self.serial.is_open:
-            if count >= 10:
-                LOGGER.error(_gen("明文sdk连接失败：串口无法连接。请重启程序"))
-                return False
-            count += 1
-            time.sleep(1)
-
-        self.writeline("command")
-        if self.readline() != "ok":
-            LOGGER.error(_gen("明文sdk初始化 command指令机器人端返回异常值"))
+        try:
+            self.socket.connect(self.address)
+        except Exception as e:
+            LOGGER.error(_gen("Failed to connect to the socket."))
             return False
 
-        LOGGER.info(_gen("明文sdk连接成功"))
-
-        # 订阅数据
+        # 连接成功
         self.writeline("game_msg on")
-
         self.set_status(CONN_STATUS_SUCCESS)
         return True
 
+    # 获取当前连接状态
     def get_status(self) -> str:
         with self.conn_status_lock:
             return self.conn_status
 
+    # 设置当前连接状态
     def set_status(self, status: str) -> bool:
         with self.conn_status_lock:
             if status not in (CONN_STATUS_ING, CONN_STATUS_SUCCESS):
                 LOGGER.warning(_gen(f"设置连接状态为未定义值，具体值为：{status}"))
                 return False
+            self.conn_status_lock = CONN_STATUS_SUCCESS
             LOGGER.info(_gen(f"设置连接状态为 {status}"))
             return True
 
@@ -102,7 +95,6 @@ class RndisConnection:
                     LOGGER.info(f"选手端 键盘按下：{pressed_key}")
 
                     self.handler("KEYBOARD", pressed_key)
-
             else:
                 LOGGER.error(_gen("状态值异常，请检查代码。"))
-                time.sleep(5)
+                time.sleep(1)

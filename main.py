@@ -3,7 +3,7 @@
 from modules.utils.logger import logger as LOGGER
 from modules.robot.robot import Robot
 from modules.skill.skill_manager import SkillManager
-from modules.uart.uart_connection import UartConnection
+from modules.rndis.rndis_connection import RndisConnection
 
 
 def main() -> bool:
@@ -15,18 +15,20 @@ def main() -> bool:
     
     skill_manager = SkillManager(robot)
     if not skill_manager.load_skills():
-        LOGGER.error("技能加载失败")
+        LOGGER.error("Failed to load skills")
         return False
-    skill_manager.log_skills()
+    # skill_manager.log_skills()
 
     def handler(command: str, data: str):
         if command == "KEYBOARD":
             skill_manager.load_skills(data)
 
-    uart_connection = UartConnection(handler)
-    if not uart_connection.initialize():
-        LOGGER.error("明文sdk连接失败")
-    uart_connection.start()
+    rndis_conn = RndisConnection(handler)
+    if not rndis_conn.initialize():
+        LOGGER.error("Failed to connect to the socket.")
+        return False
+
+    rndis_conn.start()
 
     while True:
         pass
