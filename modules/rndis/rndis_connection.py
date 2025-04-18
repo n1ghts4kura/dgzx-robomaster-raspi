@@ -5,7 +5,7 @@ import threading
 from ..utils.logger import logger as LOGGER
 from ..utils.logger import LOGGER_PREFIX as _p
 from ..utils.logger import PREFIX_GENERATOR
-_gen = PREFIX_GENERATOR(LOGGER_PREFIX = _p["RNDIS_CONNECTION"])
+_gen = PREFIX_GENERATOR(_p["RNDIS_CONNECTION"])
 
 CONN_STATUS_ING     = 0x00
 CONN_STATUS_SUCCESS = 0x01
@@ -21,6 +21,8 @@ class RndisConnection:
         port: int = 40923,
         timeout  = 5 # 单位: seconds
     ):
+        self.handler = handler
+
         self.conn_status = CONN_STATUS_ING
         self.conn_status_lock = threading.Lock()
 
@@ -76,7 +78,7 @@ class RndisConnection:
             if status not in (CONN_STATUS_ING, CONN_STATUS_SUCCESS):
                 LOGGER.warning(_gen(f"设置连接状态为未定义值，具体值为：{status}"))
                 return False
-            self.conn_status_lock = CONN_STATUS_SUCCESS
+            self.conn_status = CONN_STATUS_SUCCESS
             LOGGER.info(_gen(f"设置连接状态为 {status}"))
             return True
 
