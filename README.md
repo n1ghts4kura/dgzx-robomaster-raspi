@@ -125,6 +125,7 @@ $ sudo python3.7 -m pip install upgrade pip
 
 #### 2. OpenCV
 仍然是安装依赖来开头。
+
 ```sh
 $ sudo apt-get install cmake git pkg-config -y
 $ sudo apt-get install libjpeg8-dev -y
@@ -133,7 +134,9 @@ $ sudo apt-get install libjpeg8-dev -y
 $ sudo apt-get install libtiff5-dev -y
 $ sudo apt-get install libjasper-dev -y
 ```
+
 如果在上一步最后一行的指令出现报错，那么请移步**项目文件夹**创建虚拟环境再执行下方指令。
+
 ```sh
 $ cd my-project # or dgzx-robomaster-raspi
 # 更新pip
@@ -142,11 +145,21 @@ $ python3.7 -m venv ./venv
 $ source ./venv/bin/activate
 $ pip3 install https://github.com/google-coral/pycoral/releases/download/v1.0.1/tflite_runtime-2.5.0-cp37-cp37m-linux-aarch64.whl
 ```
+
 执行完毕后继续执行下方指令。
+
 ```sh
 $ sudo apt-get install libpng12-dev -y
 $ sudo apt-get install libavcodec-dev libacformat-dev libswscale-dev libv4l-dev -y
 $ sudo apt-get install libgtk2.0-dev -y
 $ sudo apt-get install libatlas-base-dev gfortran -y
 ```
-然后开始OpenCV的编译。
+至此已经完成OpenCV的安装，因采用pip方式安装故无需编译。
+
+#### 3. 开启树莓派的摄像头功能（部分镜像可能默认禁用摄像头，可以检查一下）
+
+```sh
+$ sudo raspi-config
+# 按方向键选中Interface Options，进入下一级菜单。选中Camera，按Tab切换到Select，按回车，选择Yes以确认。
+# 可能需要重启才能使用摄像头。
+```
