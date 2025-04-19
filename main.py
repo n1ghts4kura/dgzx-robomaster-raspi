@@ -1,9 +1,11 @@
 # /usr/local/bin/python3.7.8
 
-from modules.utils.logger import logger as LOGGER
 from modules.robot.robot import Robot
 from modules.skill.skill_manager import SkillManager
 from modules.rndis.rndis_connection import RndisConnection
+
+from modules.utils.logger import *
+_logger = get_logger
 
 
 def main() -> bool:

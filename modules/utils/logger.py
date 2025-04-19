@@ -4,6 +4,7 @@
 import os
 import datetime
 import logging
+from logging import Logger
 
 current_path = os.getcwd()
 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(":", "-")
@@ -27,11 +28,32 @@ file_output_handler.setLevel(logging.DEBUG)
 logger.addHandler(cmd_output_handler)
 logger.addHandler(file_output_handler)
 
-LOGGER_PREFIX = {
-    "RNDIS_CONNECTION": "[class RndisConnection] "
+class MyLogger:
+    def __init__(self, prefix: str):
+        self.prefix: str    = prefix
+        self.logger: Logger = logger
+
+    def info(self, content: str):
+        self.logger.info(self.prefix + content)
+    
+    def error(self, content: str):
+        self.logger.error(self.prefix + content)
+
+    def warning(self, content: str):
+        self.logger.warning(self.prefix + content)
+
+    def debug(self, content: str):
+        self.logger.debug(self.prefix + content)
+
+PREFIX_LIST = {
+    "MAIN":                   "[main.py] ",
+    "CLASS_RNDIS_CONNECTION": "[class RndisConnection] ",
 }
 
-def PREFIX_GENERATOR(prefix: str):
-    def wrapper(content: str):
-        return prefix + content
-    return wrapper
+def get_logger(identity: str):
+    if identity not in PREFIX_LIST:
+    	logger.error(f"Failed to create the logger identified with \"{identity}\".")
+        return None
+    return MyLogger(PREFIX_LIST[identity])
+
+__all__ = ["get_logger", "PREFIX_LIST"]
