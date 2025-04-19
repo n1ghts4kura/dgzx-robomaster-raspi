@@ -54,13 +54,15 @@ An **_open-source_** robomaster controlling library
 ## 二、环境配置指南（未完篇）
 
 ### （一）系统选择
-在系统选择上，选用树莓派官方提供的imager安装工具。选择 **Raspberry Pi OS (64-bit)版本** 来安装，以方便后续统一环境配置细节；是否使用桌面版可自行考虑。
+在系统选择上，选用树莓派官方提供的imager安装工具。选择 **Raspberry Pi OS (64-bit)版本** 来安装，以方便后续统一环境配置细节；是否使用桌面环境可自行考虑。
 至于VNC、SSH等问题不再进行讨论，可自行在网上搜寻相关资料。
+> VNC是一种远程桌面协议，仅在有桌面环境下才能如期工作。
+> 使用SSH时，请不要将系统界面语言更改为中文，这会导致全是方块字。
 
 ### （二）Python / OpenCV安装
 
 #### 0. 准备工作
->一定要做这一步，不然后面编译出问题都不知道怎么解决的说是。T_T
+> 一定要做这一步，不然后面编译出问题都不知道怎么解决的说是。T_T
 ##### (1) 扩大sd卡可用空间
 ```sh
 $ sudo raspi-config
@@ -89,7 +91,11 @@ $ sudo /etc/init.d/dphy-swapfile restart
 ```sh
 sudo apt-get update
 sudo apt-get upgrade -y
+```
 
+> 上面两步是更新软件源和更新软件包。
+
+```sh
 sudo apt-get install build-essentials libsqlite3-dev sqlite3 bzip2 libbz2-dev
 ```
 > 这一步是在安装后面编译Python所需要的库。
